@@ -1,6 +1,3 @@
-// =====================================
-// SHOW PAGE
-// =====================================
 
 function showPage(pageName) {
 
@@ -41,10 +38,6 @@ function showPage(pageName) {
 
 }
 
-
-// =====================================
-// CHANGE TASK TYPE
-// =====================================
 
 function changeTaskType() {
 
@@ -91,10 +84,6 @@ function changeTaskType() {
 }
 
 
-// =====================================
-// LOAD TEAM MEMBERS
-// =====================================
-
 async function loadTeamMembers() {
 
     let response =
@@ -134,10 +123,6 @@ async function loadTeamMembers() {
 
 }
 
-
-// =====================================
-// ADD INTERN
-// =====================================
 
 document
     .getElementById("internForm")
@@ -209,10 +194,6 @@ document
         }
     );
 
-
-// =====================================
-// LOAD INTERNS
-// =====================================
 
 async function loadInterns() {
 
@@ -292,9 +273,6 @@ async function loadInterns() {
 }
 
 
-// =====================================
-// ASSIGN TASK
-// =====================================
 
 document
     .getElementById("taskForm")
@@ -445,9 +423,6 @@ document
     );
 
 
-// =====================================
-// LOAD TASKS
-// =====================================
 
 async function loadTasks() {
 
@@ -632,9 +607,6 @@ async function loadTasks() {
 }
 
 
-// =====================================
-// UPDATE STATUS
-// =====================================
 
 async function updateStatus(
     taskId,
@@ -673,10 +645,6 @@ async function updateStatus(
 }
 
 
-// =====================================
-// OVERDUE
-// =====================================
-
 async function loadOverdue() {
 
     let response =
@@ -697,9 +665,6 @@ async function loadOverdue() {
 }
 
 
-// =====================================
-// PROGRESS
-// =====================================
 
 async function loadProgress() {
 
@@ -790,9 +755,6 @@ async function loadProgress() {
 }
 
 
-// =====================================
-// START APPLICATION
-// =====================================
 
 window.onload = function() {
 
