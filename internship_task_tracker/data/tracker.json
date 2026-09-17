@@ -1,0 +1,43 @@
+{
+    "interns": [
+        {
+            "id": 1,
+            "name": "subash",
+            "email": "subashoffcl@gmail.com",
+            "department": "python",
+            "joining_date": "2026-09-17"
+        },
+        {
+            "id": 2,
+            "name": "mohan kumar",
+            "email": "mohan@gmail.com",
+            "department": "ai python",
+            "joining_date": "2026-09-17"
+        }
+    ],
+    "tasks": [
+        {
+            "id": 1,
+            "assigned_to": [
+                1
+            ],
+            "title": "develop python full stack",
+            "description": "build a intern tracker for desflyer using python and json",
+            "type": "Individual",
+            "deadline": "2026-09-18",
+            "status": "In Progress"
+        },
+        {
+            "id": 2,
+            "assigned_to": [
+                1,
+                2
+            ],
+            "title": "develop python full stack",
+            "description": "build a intern tracker for desflyer using python and json",
+            "type": "Team",
+            "deadline": "2026-09-17",
+            "status": "Completed"
+        }
+    ]
+}

@@ -1,183 +1,150 @@
-let monitoring = false;
-let intervalId = null;
-let timerId = null;
-let monitoringStartedAt = null;
-let audioContext = null;
+const checkButton = document.getElementById("checkReply");
+const startButton = document.getElementById("startMonitor");
+const stopButton = document.getElementById("stopMonitor");
+const resultBox = document.getElementById("resultBox");
+const currentTime = document.getElementById("currentTime");
+const monitorState = document.getElementById("monitorState");
+const monitorIndicator = document.getElementById("monitorIndicator");
+const timezoneLabel = document.getElementById("timezoneLabel");
+const mailNotification = document.getElementById("mailNotification");
+const notificationDetails = document.getElementById("notificationDetails");
+const notificationSummary = document.getElementById("notificationSummary");
+const dismissNotification = document.getElementById("dismissNotification");
+const enquiryForm = document.getElementById("enquiryForm");
+const enquiryResult = document.getElementById("enquiryResult");
+const submitEnquiryButton = document.getElementById("submitEnquiry");
+let lastNotifiedReplyId = null;
 
-const status = document.getElementById("status");
-const replyBox = document.getElementById("replyBox");
-const monitoringTimer = document.getElementById("monitoringTimer");
+enquiryForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    submitEnquiryButton.disabled = true;
+    submitEnquiryButton.textContent = "Sending...";
+    enquiryResult.hidden = false;
 
-document.getElementById("startMonitoring").addEventListener("click", startMonitoring);
-document.getElementById("stopMonitoring").addEventListener("click", stopMonitoring);
-
-function startMonitoring() {
-
-    if (monitoring) {
-        return;
-    }
-
-    monitoring = true;
-
-    document.getElementById(
-        "monitoringStatus"
-    ).textContent = "● Active";
-    updateCurrentTime();
-    timerId = setInterval(updateCurrentTime, 1000);
-    prepareAudio();
-
-    status.textContent = "Checking...";
-    checkReplies();
-
-    intervalId = setInterval(
-        checkReplies,
-        10000
-    );
-}
-
-
-function stopMonitoring() {
-
-    monitoring = false;
-
-    clearInterval(intervalId);
-    clearInterval(timerId);
-    intervalId = null;
-    timerId = null;
-    updateCurrentTime();
-
-    document.getElementById(
-        "monitoringStatus"
-    ).textContent = "● Stopped";
-
-    status.textContent = "Monitoring stopped.";
-}
-
-
-function checkReplies() {
-
-    fetch("/check-replies")
-
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Request failed: ${response.status}`);
-            }
-
-            return response.json();
-        })
-
-        .then(data => {
-
-            status.textContent = data.message;
-
-            if (data.new_reply) {
-
-                showReply(data);
-                playReplyBeep();
-
-            }
-
-        })
-
-        .catch(error => {
-
-            console.error(
-                "Error:",
-                error
-            );
-
+    try {
+        const formData = new FormData(enquiryForm);
+        const response = await fetch("/enquiries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(Object.fromEntries(formData)),
         });
-}
-
-
-function showReply(data) {
-
-    replyBox.innerHTML = `
-
-        <h2>🔔 New Client Reply</h2>
-
-        <p>
-            ${data.message}
-        </p>
-
-        <a class="open-email" href="https://mail.google.com/mail/u/0/#all/${encodeURIComponent(data.message_id)}" target="_blank" rel="noopener">
-            Open email in Gmail
-        </a>
-
-    `;
-
-    replyBox.hidden = false;
-
-
-    if (
-        "Notification" in window &&
-        Notification.permission === "granted"
-    ) {
-
-        new Notification(
-            "New Client Reply",
-            {
-                body:
-                    "A client has replied to your email."
-            }
-        );
-
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to process enquiry.");
+        enquiryResult.innerHTML = `
+            <h2>${escapeHtml(data.status)}</h2>
+            <p>${escapeHtml(data.message)}</p>
+            <p><strong>Summary:</strong> ${escapeHtml(data.summary)}</p>
+            <p><a href="${escapeHtml(data.audio_url)}" target="_blank" rel="noopener">Open generated audio</a></p>
+            <audio controls src="${escapeHtml(data.audio_url)}"></audio>
+        `;
+        enquiryForm.reset();
+    } catch (error) {
+        enquiryResult.textContent = error.message;
+    } finally {
+        submitEnquiryButton.disabled = false;
+        submitEnquiryButton.textContent = "Send enquiry to Asterisk";
     }
+});
 
-}
-
-
-function updateCurrentTime() {
-
-    const currentTime = new Date();
-    const hours = String(currentTime.getHours()).padStart(2, "0");
-    const minutes = String(currentTime.getMinutes()).padStart(2, "0");
-    const seconds = String(currentTime.getSeconds()).padStart(2, "0");
-
-    monitoringTimer.textContent = `Current time: ${hours}:${minutes}:${seconds}`;
-}
-
-
-function prepareAudio() {
-
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-
-    if (!AudioContext) {
+function showMailNotification(result) {
+    if (!result || !result.new_reply || !result.reply_id || result.reply_id === lastNotifiedReplyId) {
         return;
     }
 
-    if (!audioContext) {
-        audioContext = new AudioContext();
-    }
+    lastNotifiedReplyId = result.reply_id;
+    notificationDetails.textContent = `${result.sender || "Unknown client"}${result.subject ? ` - ${result.subject}` : ""}`;
+    notificationSummary.textContent = result.summary || "No message summary available.";
+    mailNotification.hidden = false;
 
-    if (audioContext.state === "suspended") {
-        audioContext.resume();
+    if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("New client email received", {
+            body: notificationDetails.textContent,
+        });
     }
 }
 
-
-function playReplyBeep() {
-
-    if (!audioContext) {
-        return;
+function requestBrowserNotifications() {
+    if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
     }
+}
 
-    const frequencies = [600, 800, 1000, 1200];
-    const toneDuration = 0.5;
-    const startTime = audioContext.currentTime;
+async function refreshStatus() {
+    try {
+        const response = await fetch("/monitor-status");
+        const data = await response.json();
+        currentTime.textContent = data.current_time;
+        currentTime.dateTime = data.current_time.replace(" ", "T");
+        timezoneLabel.textContent = `Server time (${data.timezone})`;
+        monitorState.textContent = data.running ? "Monitor running" : "Monitor stopped";
+        monitorIndicator.className = `status-dot ${data.running ? "running" : "stopped"}`;
+        startButton.disabled = data.running;
+        stopButton.disabled = !data.running;
+        showMailNotification(data.last_event || data.last_result);
+    } catch (error) {
+        monitorState.textContent = "Status unavailable";
+    }
+}
 
-    frequencies.forEach((frequency, index) => {
-        const oscillator = audioContext.createOscillator();
-        const gain = audioContext.createGain();
-        const toneStart = startTime + index * toneDuration;
-        const toneEnd = toneStart + toneDuration;
+async function changeMonitor(action) {
+    const button = action === "start" ? startButton : stopButton;
+    button.disabled = true;
+    try {
+        const response = await fetch(`/monitor/${action}`, { method: "POST" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to change monitor state.");
+        resultBox.textContent = data.message;
+        resultBox.hidden = false;
+        await refreshStatus();
+    } catch (error) {
+        resultBox.textContent = error.message;
+        resultBox.hidden = false;
+    }
+}
 
-        oscillator.frequency.value = frequency;
-        gain.gain.setValueAtTime(0.15, toneStart);
-        gain.gain.exponentialRampToValueAtTime(0.001, toneEnd);
-        oscillator.connect(gain);
-        gain.connect(audioContext.destination);
-        oscillator.start(toneStart);
-        oscillator.stop(toneEnd);
-    });
+startButton.addEventListener("click", () => {
+    requestBrowserNotifications();
+    changeMonitor("start");
+});
+stopButton.addEventListener("click", () => changeMonitor("stop"));
+
+checkButton.addEventListener("click", async () => {
+    requestBrowserNotifications();
+    checkButton.disabled = true;
+    checkButton.textContent = "Checking Gmail...";
+
+    try {
+        const response = await fetch("/check-reply");
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || "Unable to check Gmail.");
+        showMailNotification(data);
+
+        resultBox.innerHTML = `
+            <h2>${escapeHtml(data.status || "Result")}</h2>
+            <p>${escapeHtml(data.message || "No status returned.")}</p>
+            ${data.sender ? `<p><strong>Recognized client:</strong> ${escapeHtml(data.sender)}</p>` : ""}
+            ${data.subject ? `<p><strong>Subject:</strong> ${escapeHtml(data.subject)}</p>` : ""}
+            ${data.audio_url ? `<p><strong>Audio:</strong> <a href="${escapeHtml(data.audio_url)}" target="_blank" rel="noopener">Open audio file</a></p><audio controls src="${escapeHtml(data.audio_url)}"></audio>` : ""}
+        `;
+        resultBox.hidden = false;
+    } catch (error) {
+        resultBox.textContent = error.message;
+        resultBox.hidden = false;
+    } finally {
+        checkButton.disabled = false;
+        checkButton.textContent = "Check Gmail now";
+    }
+});
+
+dismissNotification.addEventListener("click", () => {
+    mailNotification.hidden = true;
+});
+
+refreshStatus();
+setInterval(refreshStatus, 1000);
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, character => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+    }[character]));
 }

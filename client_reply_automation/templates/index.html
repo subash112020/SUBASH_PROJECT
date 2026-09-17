@@ -3,22 +3,52 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Client Reply Monitor</title>
+    <title>Client Enquiry Voice Call</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <main class="container">
-        <h1>Client Reply Monitor</h1>
-        <p>Check the employee Gmail inbox for a new client reply.</p>
-        <section class="status-card" aria-live="polite">
-            <p class="subtitle">Monitoring status</p>
-            <p id="monitoringStatus" class="connected">● Stopped</p>
-            <p id="status">Ready.</p>
-            <p id="monitoringTimer">Current time: 00:00:00</p>
-            <button id="startMonitoring" type="button">Start monitoring</button>
-            <button id="stopMonitoring" type="button">Stop monitoring</button>
+        <h1>Client Enquiry Voice Call</h1>
+        <p>Submit an enquiry to create a spoken summary and send it to Asterisk for a test call.</p>
+        <section class="status-card">
+            <h2>New enquiry</h2>
+            <form id="enquiryForm">
+                <label for="enquiryName">Client name</label>
+                <input id="enquiryName" name="name" required>
+                <label for="enquiryPhone">Phone number</label>
+                <input id="enquiryPhone" name="phone" type="tel" required>
+                <label for="enquiryMessage">Enquiry</label>
+                <textarea id="enquiryMessage" name="message" rows="4" required></textarea>
+                <button id="submitEnquiry" type="submit">Send enquiry to Asterisk</button>
+            </form>
         </section>
-        <section id="replyBox" class="reply-box" hidden></section>
+        <section id="enquiryResult" class="reply-box" aria-live="polite" hidden></section>
+        <h2>Gmail reply monitor</h2>
+        <p>Use this optional workflow to watch Gmail for a client reply.</p>
+        <section class="status-card">
+            <div class="monitor-header">
+                <div>
+                    <span id="monitorIndicator" class="status-dot stopped"></span>
+                    <strong id="monitorState">Monitor stopped</strong>
+                </div>
+                <time id="currentTime" datetime="">Loading time...</time>
+            </div>
+            <p id="timezoneLabel"></p>
+            <div class="controls">
+                <button id="startMonitor" type="button">Start monitor</button>
+                <button id="stopMonitor" type="button" class="secondary">Stop monitor</button>
+            </div>
+            <button id="checkReply" type="button">Check Gmail now</button>
+        </section>
+        <section id="mailNotification" class="mail-notification" aria-live="assertive" hidden>
+            <div>
+                <strong>New client email received</strong>
+                <p id="notificationDetails"></p>
+                <p id="notificationSummary"></p>
+            </div>
+            <button id="dismissNotification" type="button" class="secondary">Dismiss</button>
+        </section>
+        <section id="resultBox" class="reply-box" aria-live="polite" hidden></section>
     </main>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>

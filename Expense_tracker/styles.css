@@ -96,6 +96,43 @@ body {
     color: #1e293b;
 }
 
+.history-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.history-filter label {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.history-filter input,
+.history-filter button {
+    padding: 9px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+}
+
+.history-filter button {
+    background: #1e293b;
+    color: white;
+    cursor: pointer;
+}
+
+.history-filter button:hover {
+    background: #334155;
+}
+
+.history-total {
+    margin-bottom: 16px;
+    color: #0f172a;
+    font-weight: 600;
+}
+
 .table-container {
     overflow-x: auto;
     margin-top: 20px;

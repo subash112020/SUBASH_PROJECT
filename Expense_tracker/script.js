@@ -149,25 +149,16 @@ function showHistory() {
     fetch("/api/expenses")
         .then(response => response.json())
         .then(data => {
-            if (!data || data.length === 0) {
-                document.getElementById("content").innerHTML = `
-                    <h2>Expense History</h2>
-                    <p>No expenses recorded yet.</p>
-                `;
-                return;
-            }
-
-            const rows = data.map(expense => `
-                <tr>
-                    <td>${expense.date}</td>
-                    <td>${expense.name}</td>
-                    <td>${expense.category}</td>
-                    <td>₹${Number(expense.amount).toFixed(2)}</td>
-                </tr>
-            `).join("");
-
             document.getElementById("content").innerHTML = `
                 <h2>Expense History</h2>
+                <div class="history-filter">
+                    <label for="historyDate">Filter by date</label>
+                    <input type="date" id="historyDate">
+                    <button type="button" id="filterHistoryButton">Filter</button>
+                    <button type="button" id="clearHistoryFilterButton">Clear</button>
+                </div>
+                <p id="historyTotal" class="history-total"></p>
+                <p id="historyMessage"></p>
                 <div class="table-container">
                     <table class="expense-table">
                         <thead>
@@ -178,10 +169,44 @@ function showHistory() {
                                 <th>Amount</th>
                             </tr>
                         </thead>
-                        <tbody>${rows}</tbody>
+                        <tbody id="historyRows"></tbody>
                     </table>
                 </div>
             `;
+
+            const dateInput = document.getElementById("historyDate");
+            const renderHistory = () => {
+                const selectedDate = dateInput.value;
+                const filteredExpenses = selectedDate
+                    ? data.filter(expense => expense.date === selectedDate)
+                    : data;
+                const total = filteredExpenses.reduce(
+                    (sum, expense) => sum + Number(expense.amount || 0),
+                    0
+                );
+
+                document.getElementById("historyTotal").textContent = selectedDate
+                    ? `Total for ${selectedDate}: ₹${total.toFixed(2)}`
+                    : `Total expenses: ₹${total.toFixed(2)}`;
+                document.getElementById("historyMessage").textContent = filteredExpenses.length
+                    ? ""
+                    : "No expenses recorded for this date.";
+                document.getElementById("historyRows").innerHTML = filteredExpenses.map(expense => `
+                    <tr>
+                        <td>${expense.date}</td>
+                        <td>${expense.name}</td>
+                        <td>${expense.category}</td>
+                        <td>₹${Number(expense.amount).toFixed(2)}</td>
+                    </tr>
+                `).join("");
+            };
+
+            document.getElementById("filterHistoryButton").addEventListener("click", renderHistory);
+            document.getElementById("clearHistoryFilterButton").addEventListener("click", () => {
+                dateInput.value = "";
+                renderHistory();
+            });
+            renderHistory();
         })
         .catch(() => {
             document.getElementById("content").innerHTML = `

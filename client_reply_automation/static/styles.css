@@ -1,6 +1,6 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
+    font-family: "Segoe UI", sans-serif;
+    background: #eef3f1;
     margin: 0;
     padding: 40px;
 }
@@ -12,6 +12,7 @@ body {
 
 h1 {
     text-align: center;
+    color: #173b35;
 }
 
 .subtitle {
@@ -24,20 +25,36 @@ h1 {
     background: white;
     padding: 25px;
     margin-top: 25px;
-    border-radius: 10px;
+    border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.connected {
-    color: green;
-    font-weight: bold;
+label {
+    display: block;
+    margin-top: 16px;
+    color: #31554d;
+    font-weight: 600;
+}
+
+input,
+textarea {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 7px;
+    padding: 12px;
+    border: 1px solid #b7cbc5;
+    border-radius: 5px;
+    font: inherit;
 }
 
 button {
     padding: 12px 20px;
     margin: 20px 10px 0 0;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
+    background: #176b5b;
+    color: white;
+    font-weight: 600;
     cursor: pointer;
 }
 
@@ -49,4 +66,73 @@ button {
     background: #1a73e8;
     color: white;
     text-decoration: none;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.monitor-header,
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.monitor-header time,
+#timezoneLabel {
+    color: #5d6c68;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: #9aa7a3;
+}
+
+.status-dot.running {
+    background: #1d9b72;
+}
+
+.secondary {
+    background: #66736f;
+}
+
+.mail-notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 18px 22px;
+    margin-top: 25px;
+    border-left: 5px solid #d67b28;
+    border-radius: 8px;
+    background: #fff4e6;
+    color: #5f3718;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mail-notification[hidden] {
+    display: none;
+}
+
+.mail-notification p {
+    margin: 6px 0 0;
+}
+
+#notificationSummary {
+    max-width: 680px;
+    color: #744c2c;
+}
+
+audio {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
 }

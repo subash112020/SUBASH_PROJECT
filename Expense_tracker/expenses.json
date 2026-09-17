@@ -16,5 +16,29 @@
         "name": "football",
         "category": "playing",
         "amount": 200.0
+    },
+    {
+        "date": "2026-09-15",
+        "name": "break fast",
+        "category": "food",
+        "amount": 100.0
+    },
+    {
+        "date": "2026-09-15",
+        "name": "lunch",
+        "category": "food",
+        "amount": 150.0
+    },
+    {
+        "date": "2026-09-15",
+        "name": "dinner",
+        "category": "food",
+        "amount": 100.0
+    },
+    {
+        "date": "2026-09-15",
+        "name": "bus charge",
+        "category": "travel",
+        "amount": 100.0
     }
 ]
