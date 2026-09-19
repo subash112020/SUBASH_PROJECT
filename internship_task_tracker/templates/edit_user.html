@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">Admin only</span><h1>Edit user</h1><p class="text-muted">Update login details, role, profile, or set a new password.</p></div><a class="btn btn-outline-secondary" href="{{ url_for('user_management') }}"><i class="bi bi-arrow-left"></i> Back</a></div>
+<form method="post" class="card form-card"><div class="card-body p-4 p-lg-5"><div class="row g-4">
+<div class="col-md-6"><label class="form-label">Username</label><input class="form-control" name="username" value="{{ user.username }}" required></div>
+<div class="col-md-6"><label class="form-label">Email</label><input class="form-control" type="email" name="email" value="{{ user.email }}" required></div>
+<div class="col-md-6"><label class="form-label">Role</label><select class="form-select" id="editRole" name="role" onchange="filterProfiles()" required><option value="admin" {{ 'selected' if user.role=='admin' }}>Admin</option><option value="mentor" {{ 'selected' if user.role=='mentor' }}>Mentor</option><option value="intern" {{ 'selected' if user.role=='intern' }}>Intern</option></select></div>
+<div class="col-md-6" id="editProfileWrap"><label class="form-label" id="editProfileLabel">Profile</label><select class="form-select" name="profile_id" id="editProfile"><option value="">Select profile</option>{% for mentor in mentors %}<option class="mentor-option" value="{{ mentor.id }}" {{ 'selected' if user.mentor_id==mentor.id }}>{{ mentor.name }}</option>{% endfor %}{% for intern in interns %}<option class="intern-option" value="{{ intern.id }}" {{ 'selected' if user.intern_id==intern.id }}>{{ intern.name }} ({{ intern.id }})</option>{% endfor %}</select></div>
+<div class="col-md-6"><label class="form-label">Password status</label><div class="password-status-box"><span class="status status-completed"><i class="bi bi-shield-check"></i> Protected</span><div class="form-text mt-2">The existing password is securely hashed and cannot be recovered or displayed. Leave the new password blank to keep it unchanged.</div></div></div>
+<div class="col-md-6"><label class="form-label">New password <span class="text-muted fw-normal">(optional)</span></label><div class="password-wrap"><input id="editPassword" class="form-control" type="password" name="password" minlength="6" placeholder="Enter a new password"><button type="button" class="password-toggle" onclick="togglePassword('editPassword', this)"><i class="bi bi-eye"></i></button></div></div>
+</div><div class="mt-5 d-flex justify-content-end gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('user_management') }}">Cancel</a><button class="btn btn-primary" type="submit"><i class="bi bi-check2"></i> Save changes</button></div></div></form>
+<script>
+function filterProfiles(){const role=document.getElementById("editRole").value,wrap=document.getElementById("editProfileWrap"),select=document.getElementById("editProfile");wrap.classList.toggle("d-none",role==="admin");select.required=role!=="admin";document.getElementById("editProfileLabel").textContent=role==="mentor"?"Mentor profile":"Intern profile";[...select.options].forEach(o=>{if(o.value)o.hidden=!o.classList.contains(role+"-option")});}
+function togglePassword(id,button){const i=document.getElementById(id),x=button.querySelector("i");i.type=i.type==="password"?"text":"password";x.className=i.type==="password"?"bi bi-eye":"bi bi-eye-slash";}
+filterProfiles();
+</script>
+{% endblock %}

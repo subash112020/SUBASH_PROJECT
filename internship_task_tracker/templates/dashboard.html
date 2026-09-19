@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">Admin workspace</span><h1>Dashboard</h1><p class="text-muted">Monitor internship activity, tasks, and progress.</p></div>
+  <div class="d-flex gap-2"><a class="btn btn-outline-secondary" href="{{ url_for('view_mentors') }}"><i class="bi bi-person-badge"></i> Mentors</a><a class="btn btn-primary" href="{{ url_for('assign_task') }}"><i class="bi bi-plus-lg"></i> Assign task</a></div>
+</div>
+
+<div class="row g-3 mb-4">
+{% for label, value, icon, tone in [('Total interns', total_interns, 'people-fill', 'blue'),('Active interns', active_interns, 'person-check-fill', 'green'),('Past employees', past_employees, 'person-x-fill', 'red'),('Departments', total_departments, 'building-fill', 'cyan'),('Total tasks', total_tasks, 'list-check', 'violet'),('Completed', completed, 'check-circle-fill', 'green'),('Start', start, 'hourglass-split', 'amber'),('In progress', in_progress, 'arrow-repeat', 'cyan'),('Not completed', not_completed, 'x-circle-fill', 'red'),('Overdue', overdue, 'exclamation-triangle-fill', 'red')] %}
+<div class="col-6 col-xl-2"><div class="metric-card"><div class="metric-icon {{ tone }}"><i class="bi bi-{{ icon }}"></i></div><strong>{{ value }}</strong><span>{{ label }}</span></div></div>
+{% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-5"><div class="card dashboard-panel h-100"><div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-start"><div><span class="eyebrow">Programme health</span><h2>Overall progress</h2></div><div class="big-progress">{{ progress }}%</div></div>
+    <div class="progress progress-lg my-4"><div class="progress-bar" style="width:{{ progress }}%"></div></div>
+    <div class="d-flex justify-content-between text-muted small"><span>{{ completed }} of {{ total_tasks }} tasks complete</span><span>Updated today</span></div><hr>
+    <div class="quick-links"><a href="{{ url_for('reports') }}"><i class="bi bi-bar-chart-line"></i><span>View detailed reports</span><i class="bi bi-arrow-up-right ms-auto"></i></a><a href="{{ url_for('view_interns') }}"><i class="bi bi-people"></i><span>Manage intern directory</span><i class="bi bi-arrow-up-right ms-auto"></i></a><a href="{{ url_for('view_mentors') }}"><i class="bi bi-person-badge"></i><span>Manage mentors</span><i class="bi bi-arrow-up-right ms-auto"></i></a></div>
+  </div></div></div>
+
+  <div class="col-xl-7"><div class="card dashboard-panel h-100"><div class="card-body p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3"><div><span class="eyebrow">Latest activity</span><h2>Task pipeline</h2></div><a class="small link-primary" href="{{ url_for('view_tasks') }}">View all</a></div>
+    <div class="table-responsive"><table class="table compact-table align-middle"><thead><tr><th>Task</th><th>Department</th><th>Intern</th><th>Status</th><th>Project ZIP</th><th>Due</th></tr></thead><tbody>
+    {% for task in tasks[:6] %}<tr class="{{ 'overdue-row' if task.overdue else '' }}"><td><strong>{{ task.title }}</strong><small class="d-block text-muted">{{ task.id }}</small></td><td>{{ task.department }}</td><td>{{ task.intern_name }}</td><td><span class="status status-{{ task.status|lower|replace(' ', '-') }}">{{ task.status }}</span></td><td>{% if task.project_file %}<a class="btn btn-sm btn-light" href="{{ url_for('download_project', task_id=task.id) }}"><i class="bi bi-download"></i> ZIP</a>{% else %}<span class="text-muted small">—</span>{% endif %}</td><td>{{ task.deadline }}</td></tr>
+    {% else %}<tr><td colspan="6" class="empty-state">No tasks have been assigned yet.</td></tr>{% endfor %}</tbody></table></div>
+  </div></div></div>
+</div>
+
+<div class="section-title"><div><span class="eyebrow">People</span><h2>Recently completed</h2><p class="text-muted small mb-0">Interns who most recently completed a task.</p></div><a class="btn btn-sm btn-light" href="{{ url_for('view_interns') }}">Manage interns <i class="bi bi-arrow-right"></i></a></div>
+<div class="row g-3">{% for intern in recent_completed[:4] %}<div class="col-md-6 col-xl-3"><div class="card intern-card"><div class="card-body">
+  <div class="d-flex align-items-center gap-3 mb-3"><div class="avatar">{{ intern.name[:1]|upper }}</div><div><strong>{{ intern.name }}</strong><small class="d-block text-muted"><span class="department-badge">{{ intern.department }}</span></small></div></div>
+  <div class="d-flex justify-content-between small mb-1"><span>Progress</span><strong>{{ intern.progress }}%</strong></div><div class="progress"><div class="progress-bar" style="width:{{ intern.progress }}%"></div></div>
+  <div class="d-flex justify-content-between text-muted small mt-3"><span>{{ intern.total_tasks }} tasks</span><span>{{ intern.completed_tasks }} done</span></div>
+  <div class="latest-task mt-3"><small>Recently completed</small><strong>{{ intern.latest_completed_task }}</strong><span class="text-muted small">{{ intern.latest_completed_at }}</span></div>
+</div></div></div>{% else %}<div class="col-12"><div class="card empty-state">No completed tasks yet.</div></div>{% endfor %}</div>
+{% endblock %}

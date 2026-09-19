@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">Admin only</span><h1>User management</h1><p class="text-muted">Create and manage login accounts for admins, mentors, and interns.</p></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card"><div class="card-body p-4">
+      <span class="eyebrow">Create account</span><h2 class="mt-2 mb-4">New user</h2>
+      <form method="post">
+        <div class="mb-3"><label class="form-label">Username</label><input class="form-control" name="username" placeholder="e.g. arun123" required></div>
+        <div class="mb-3"><label class="form-label">Email</label><input class="form-control" type="email" name="email" placeholder="user@example.com" required></div>
+        <div class="mb-3"><label class="form-label">Password</label><input class="form-control" type="password" name="password" minlength="6" placeholder="At least 6 characters" required></div>
+        <div class="mb-3"><label class="form-label">Role</label><select class="form-select" id="createRole" name="role" onchange="showProfile('createRole','createProfileWrap','createProfile')" required><option value="">Select role</option><option value="admin">Admin</option><option value="mentor">Mentor</option><option value="intern">Intern</option></select></div>
+        <div class="mb-3 d-none" id="createProfileWrap"><label class="form-label" id="createProfileLabel">Profile</label><select class="form-select" name="profile_id" id="createProfile"><option value="">Select profile</option>{% for mentor in mentors %}<option class="mentor-option" value="{{ mentor.id }}">{{ mentor.name }}</option>{% endfor %}{% for intern in interns %}<option class="intern-option" value="{{ intern.id }}">{{ intern.name }} ({{ intern.id }})</option>{% endfor %}</select></div>
+        <button class="btn btn-primary w-100" type="submit"><i class="bi bi-person-plus"></i> Create account</button>
+      </form>
+    </div></div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card table-card"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Profile</th><th class="text-end">Actions</th></tr></thead><tbody>
+    {% for user in users %}<tr><td><strong>{{ user.username }}</strong></td><td>{{ user.email }}</td><td><span class="user-role {{ user.role }}">{{ user.role|upper }}</span></td><td>{{ user.profile or '—' }}</td><td class="text-end text-nowrap"><a class="btn btn-sm btn-light" href="{{ url_for('edit_user', user_id=user.id) }}" title="Edit"><i class="bi bi-pencil"></i> Edit</a>{% if user.id != current_user.id %}<form class="d-inline" method="post" action="{{ url_for('delete_user', user_id=user.id) }}" onsubmit="return confirm('Delete this login account?')"><button class="btn btn-sm btn-light text-danger" title="Delete"><i class="bi bi-trash3"></i> Delete</button></form>{% endif %}</td></tr>
+    {% else %}<tr><td colspan="5" class="empty-state">No login accounts found.</td></tr>{% endfor %}
+    </tbody></table></div></div>
+  </div>
+</div>
+<script>
+function showProfile(roleId, wrapId, selectId) {
+  const role=document.getElementById(roleId).value, wrap=document.getElementById(wrapId), select=document.getElementById(selectId), label=document.getElementById('createProfileLabel');
+  wrap.classList.toggle('d-none', role==='admin' || role==='');
+  select.required = role!=='admin' && role!=='';
+  if(label) label.textContent = role==='mentor' ? 'Mentor profile' : 'Intern profile';
+  [...select.options].forEach(o => { if(o.value) o.hidden = !o.classList.contains(role+'-option'); });
+  select.value='';
+}
+</script>
+{% endblock %}

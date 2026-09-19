@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Mentor Dashboard{% endblock %}
+{% block content %}
+<div class="page-heading"><div><span class="eyebrow">Mentor workspace</span><h1>Welcome, {{ current_user.username|title }}.</h1><p class="text-muted">Manage assigned interns, project tasks, and progress.</p></div><a class="btn btn-primary" href="{{ url_for('assign_task') }}"><i class="bi bi-plus-lg"></i> Assign task</a></div>
+<div class="row g-3 mb-4">
+{% for label, value, icon, tone in [('My interns', interns|length, 'people-fill', 'blue'),('My tasks', total_tasks, 'list-check', 'violet'),('Completed', completed, 'check-circle-fill', 'green'),('Overall progress', progress ~ '%', 'graph-up-arrow', 'cyan')] %}
+<div class="col-6 col-xl-3"><div class="metric-card"><div class="metric-icon {{ tone }}"><i class="bi bi-{{ icon }}"></i></div><strong>{{ value }}</strong><span>{{ label }}</span></div></div>
+{% endfor %}
+</div>
+
+<div class="section-title"><div><span class="eyebrow">Your team</span><h2>Intern progress</h2></div><a class="btn btn-sm btn-light" href="{{ url_for('reports') }}">View reports <i class="bi bi-arrow-right"></i></a></div>
+<div class="row g-3 mb-4">
+{% for intern in interns %}<div class="col-md-6 col-xl-4"><div class="card intern-card"><div class="card-body">
+  <div class="d-flex align-items-center gap-3 mb-3"><div class="avatar">{{ intern.name[:1]|upper }}</div><div><strong>{{ intern.name }}</strong><small class="d-block text-muted">{{ intern.department }}</small></div></div>
+  <div class="d-flex justify-content-between small mb-1"><span>Progress</span><strong>{{ intern.progress }}%</strong></div><div class="progress"><div class="progress-bar" style="width:{{ intern.progress }}%"></div></div>
+  <div class="d-flex justify-content-between text-muted small mt-3"><span>{{ intern.total_tasks }} tasks</span><span>{{ intern.completed_tasks }} done</span></div>
+  <div class="latest-task mt-3"><small>Latest completed task</small><strong>{{ intern.latest_completed_task }}</strong></div>
+</div></div></div>{% else %}<div class="col-12"><div class="card empty-state">No interns are assigned to you yet.</div></div>{% endfor %}
+</div>
+
+<div class="card dashboard-panel"><div class="card-body p-4"><div class="d-flex justify-content-between align-items-center mb-3"><div><span class="eyebrow">Delivery pipeline</span><h2>My tasks</h2></div><a class="small link-primary" href="{{ url_for('view_tasks') }}">View all</a></div>
+<div class="table-responsive"><table class="table compact-table align-middle"><thead><tr><th>Project / Task title</th><th>Type</th><th>Intern / Team</th><th>Status</th><th>Project ZIP</th><th>Due</th></tr></thead><tbody>
+{% for task in tasks[:10] %}<tr class="{{ 'overdue-row' if task.overdue else '' }}"><td><strong>{{ task.title }}</strong><small class="d-block text-muted">ID {{ task.id }}</small></td><td>{{ task.task_type }}</td><td>{{ task.intern_name }}</td><td><span class="status status-{{ task.status|lower|replace(' ', '-') }}">{{ task.status }}</span></td><td>{% if task.project_file %}<a class="btn btn-sm btn-light" href="{{ url_for('download_project', task_id=task.id) }}"><i class="bi bi-file-earmark-zip"></i> Download ZIP</a>{% else %}<span class="text-muted small">Not uploaded</span>{% endif %}</td><td>{{ task.deadline }}</td></tr>
+{% else %}<tr><td colspan="6" class="empty-state">No tasks assigned to your interns.</td></tr>{% endfor %}</tbody></table></div></div></div>
+{% endblock %}

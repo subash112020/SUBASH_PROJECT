@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Mentors{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">People directory</span><h1>Mentors</h1><p class="text-muted">Create mentor profiles and manage their contact details and documents.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('add_mentor') }}"><i class="bi bi-person-plus-fill"></i> Add mentor</a>
+</div>
+<div class="card mb-4">
+  <div class="card-body p-3 p-lg-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-5"><label class="form-label">Mentor Name</label><input id="mentorSearch" class="form-control" type="search" placeholder="Search by name, ID or email"></div>
+      <div class="col-md-4"><label class="form-label">Department</label><select id="mentorDepartment" class="form-select"><option value="">All departments</option>{% for d in departments %}<option value="{{ d|lower }}">{{ d }}</option>{% endfor %}</select></div>
+      <div class="col-md-3"><button id="clearMentorFilters" class="btn btn-outline-secondary w-100" type="button"><i class="bi bi-x-lg"></i> Clear</button></div>
+    </div>
+  </div>
+</div>
+<div class="card table-card">
+  <div class="table-scroll">
+    <table class="table align-middle mb-0"><thead><tr><th>Mentor ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Department</th><th>Interns</th><th>Document</th><th class="text-end">Actions</th></tr></thead>
+    <tbody>
+    {% for mentor in mentors %}
+    <tr class="mentor-row" data-search="{{ mentor.id|lower }} {{ mentor.name|lower }} {{ mentor.email|lower }}" data-department="{{ mentor.department|lower }}">
+      <td>{{ mentor.id }}</td><td><strong>{{ mentor.name }}</strong></td><td>{{ mentor.email }}</td><td>{{ mentor.phone }}</td>
+      <td><span class="badge department-badge">{{ mentor.department or 'Not set' }}</span></td><td>{{ mentor.assigned_count }}</td>
+      <td>{% if mentor.document %}<a class="btn btn-sm btn-light" href="{{ url_for('download_document', kind='mentor', item_id=mentor.id) }}"><i class="bi bi-file-earmark-arrow-down"></i> Download Document</a>{% else %}<span class="text-muted">Not uploaded</span>{% endif %}</td>
+      <td class="text-end text-nowrap"><a class="btn btn-sm btn-light" href="{{ url_for('edit_mentor', mentor_id=mentor.id) }}"><i class="bi bi-pencil"></i></a>
+      <form class="d-inline" method="post" action="{{ url_for('delete_mentor', mentor_id=mentor.id) }}" onsubmit="return confirm('Delete this mentor?')"><button class="btn btn-sm btn-light text-danger"><i class="bi bi-trash3"></i></button></form></td>
+    </tr>
+    {% else %}<tr><td colspan="8" class="empty-state">No mentors yet.</td></tr>{% endfor %}
+    </tbody></table>
+  </div>
+  <div id="noMentorMatches" class="empty-state d-none">No mentors found.</div>
+</div>
+<script>
+const mentorRows=[...document.querySelectorAll(".mentor-row")], mentorSearch=document.getElementById("mentorSearch"), mentorDepartment=document.getElementById("mentorDepartment");
+function filterMentors(){const q=mentorSearch.value.trim().toLowerCase(),d=mentorDepartment.value;let n=0;mentorRows.forEach(r=>{const ok=(!q||r.dataset.search.includes(q))&&(!d||r.dataset.department===d);r.classList.toggle("d-none",!ok);if(ok)n++});document.getElementById("noMentorMatches").classList.toggle("d-none",n!==0)}
+[mentorSearch,mentorDepartment].forEach(e=>e.addEventListener("input",filterMentors));
+document.getElementById("clearMentorFilters").addEventListener("click",()=>{mentorSearch.value="";mentorDepartment.value="";filterMentors()});
+</script>
+{% endblock %}

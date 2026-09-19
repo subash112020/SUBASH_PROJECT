@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Task' if task else 'Assign Task' }}{% endblock %}
+{% block content %}
+<div class="fixed-form-page">
+<div class="fixed-form-page">
+<div class="page-heading compact-heading">
+  <div><span class="eyebrow">Work allocation</span><h1>{{ 'Edit task details' if task else 'Assign a task' }}</h1></div>
+  <a class="btn btn-outline-secondary" href="{{ url_for('view_tasks') }}"><i class="bi bi-arrow-left"></i> Back to tasks</a>
+</div>
+
+<form method="post" class="card form-card wide-form-card compact-form-card">
+  <div class="card-body p-4 p-lg-4">
+    <div class="row g-3">
+      <div class="col-md-3"><label class="form-label">Task ID</label><input class="form-control task-id-field" name="task_id" value="{{ task.id if task else '' }}" placeholder="Enter task ID" {{ 'readonly' if task else 'required' }}></div>
+      <div class="col-md-3"><label class="form-label">Task Type</label>
+        <select class="form-select" id="taskType" name="task_type" required>
+          <option value="Individual Work" {{ 'selected' if not task or task.task_type == 'Individual Work' else '' }}>Individual Work</option>
+          <option value="Team Work" {{ 'selected' if task and task.task_type == 'Team Work' else '' }}>Team Work</option>
+        </select>
+      </div>
+      <div class="col-md-3"><label class="form-label">Department</label>
+        <select class="form-select" id="taskDepartment" name="department" required>
+          <option value="">Select department</option>
+          {% set current_department = task.department if task and task.department else '' %}
+          {% if not current_department and task and task.assigned_intern_ids %}
+            {% for intern in interns %}{% if intern.id in task.assigned_intern_ids %}{% set current_department = intern.department %}{% endif %}{% endfor %}
+          {% endif %}
+          {% for department in departments %}<option value="{{ department }}" {{ 'selected' if current_department == department else '' }}>{{ department }}</option>{% endfor %}
+        </select>
+      </div>
+
+      {% if current_user.role == 'mentor' %}
+      <div class="col-md-3"><label class="form-label">Choose Project</label>
+        <select class="form-select" id="projectSelect" name="project_id" required>
+          <option value="">Select an admin project</option>
+          {% for project in projects %}
+          <option value="{{ project.id }}" data-title="{{ project.title|e }}" {{ 'selected' if task and project.id == task.id else '' }}>{{ project.title }} · {{ project.id }}</option>
+          {% endfor %}
+        </select>
+        <small class="text-muted">The project title is taken from the selected project.</small>
+      </div>
+      {% endif %}
+
+      <div class="col-md-6" id="titleWrap"><label class="form-label">Task Title</label>
+        <input class="form-control" id="taskTitle" name="title" value="{{ task.title if task else '' }}" required>
+      </div>
+
+      <div class="col-md-6" id="individualPicker"><label class="form-label">Select Intern</label>
+        <select class="form-select" name="intern_id" id="individualIntern">
+          <option value="">Choose an intern</option>
+          {% for intern in interns %}<option value="{{ intern.id }}" data-department="{{ intern.department }}" {{ 'selected' if task and task.intern_id == intern.id else '' }}>{{ intern.name }} · {{ intern.id }}</option>{% endfor %}
+        </select>
+      </div>
+
+      <div class="col-md-6 d-none" id="teamPicker"><label class="form-label">Team members</label>
+        <button type="button" class="form-select text-start" data-bs-toggle="modal" data-bs-target="#teamMemberModal" id="teamMemberButton">Choose team members</button>
+        <div class="form-text" id="selectedTeamNames">No team members selected.</div>
+        {% if task %}{% for intern_id in task.assigned_intern_ids %}<input type="hidden" name="selected_intern_ids" value="{{ intern_id }}">{% endfor %}{% endif %}
+      </div>
+
+      <div class="col-12"><label class="form-label">Task Description</label><textarea class="form-control" name="description" rows="3" placeholder="What needs to be delivered?">{{ task.description if task else '' }}</textarea></div>
+      <div class="col-md-4"><label class="form-label">Deadline</label><input class="form-control" type="date" name="deadline" value="{{ task.deadline if task else '' }}" required></div>
+      <div class="col-md-4"><label class="form-label">Priority</label><select class="form-select" name="priority">{% for priority in priorities %}<option {{ 'selected' if task and task.priority == priority else '' }}>{{ priority }}</option>{% endfor %}</select></div>
+      <div class="col-md-4"><label class="form-label">Status</label><select class="form-select" name="status">{% for status in statuses %}<option {{ 'selected' if task and task.status == status else '' }}>{{ status }}</option>{% endfor %}</select></div>
+    </div>
+    <div class="mt-4 d-flex justify-content-end"><button class="btn btn-primary px-4" type="submit"><i class="bi bi-check2-circle"></i> {{ 'Save changes' if task else 'Assign task' }}</button></div>
+  </div>
+</form>
+
+</div>
+
+<div class="modal fade" id="teamMemberModal" tabindex="-1" aria-labelledby="teamMemberModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="teamMemberModalLabel">Select team members</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-body">
+      <input type="search" class="form-control mb-3" id="teamMemberSearch" placeholder="Search interns by ID or name">
+      <div class="d-flex gap-2 mb-3"><button type="button" class="btn btn-sm btn-outline-primary" id="selectAllMembers">Select all</button><button type="button" class="btn btn-sm btn-outline-secondary" id="clearMembers">Clear</button></div>
+      <div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th></th><th>Intern ID</th><th>Intern Name</th><th>Department</th></tr></thead>
+      <tbody>{% for intern in interns %}<tr class="team-member-option" data-search="{{ intern.id }} {{ intern.name }} {{ intern.department }}" data-department="{{ intern.department }}">
+        <td><input class="team-member-checkbox" type="checkbox" value="{{ intern.id }}" data-name="{{ intern.name }}" data-department="{{ intern.department }}" {{ 'checked' if task and intern.id in task.assigned_intern_ids else '' }}></td>
+        <td>{{ intern.id }}</td><td>{{ intern.name }}</td><td>{{ intern.department }}</td>
+      </tr>{% endfor %}</tbody></table></div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="applyTeamMembers">Use selected members</button></div>
+  </div></div>
+</div>
+
+<script>
+const taskType=document.getElementById("taskType"), taskDepartment=document.getElementById("taskDepartment");
+const individualPicker=document.getElementById("individualPicker"), teamPicker=document.getElementById("teamPicker"), individualIntern=document.getElementById("individualIntern");
+const teamButton=document.getElementById("teamMemberButton"), selectedTeamNames=document.getElementById("selectedTeamNames");
+const checkboxes=[...document.querySelectorAll(".team-member-checkbox")], titleInput=document.getElementById("taskTitle");
+const projectSelect=document.getElementById("projectSelect");
+
+function filterPeopleByDepartment(){
+  const d=taskDepartment.value;
+  [...individualIntern.options].forEach(o=>{if(o.value)o.hidden=!!d && o.dataset.department!==d;});
+  document.querySelectorAll(".team-member-option").forEach(row=>{
+    const show=!d || row.dataset.department===d;
+    row.classList.toggle("d-none",!show);
+    const box=row.querySelector(".team-member-checkbox");
+    if(!show) box.checked=false;
+  });
+  syncTeamMembers();
+}
+function syncTaskType(){
+  const team=taskType.value==="Team Work";
+  individualPicker.classList.toggle("d-none",team);
+  teamPicker.classList.toggle("d-none",!team);
+  individualIntern.disabled=team;
+}
+function syncTeamMembers(){
+  const selected=checkboxes.filter(b=>b.checked);
+  document.querySelectorAll('input[name="selected_intern_ids"]').forEach(i=>i.remove());
+  selected.forEach(b=>{const i=document.createElement("input");i.type="hidden";i.name="selected_intern_ids";i.value=b.value;document.querySelector("form").appendChild(i);});
+  const names=selected.map(b=>b.dataset.name);
+  selectedTeamNames.textContent=names.length?names.join(", "):"No team members selected.";
+  teamButton.textContent=names.length?`${names.length} member(s) selected`:"Choose team members";
+}
+taskType.addEventListener("change",syncTaskType);
+taskDepartment.addEventListener("change",filterPeopleByDepartment);
+document.getElementById("applyTeamMembers").addEventListener("click",syncTeamMembers);
+document.getElementById("selectAllMembers").addEventListener("click",()=>{checkboxes.forEach(b=>{if(!b.closest(".team-member-option").classList.contains("d-none"))b.checked=true});syncTeamMembers()});
+document.getElementById("clearMembers").addEventListener("click",()=>{checkboxes.forEach(b=>b.checked=false);syncTeamMembers()});
+document.getElementById("teamMemberSearch").addEventListener("input",e=>{const q=e.target.value.toLowerCase();document.querySelectorAll(".team-member-option").forEach(row=>row.classList.toggle("d-none",!row.dataset.search.toLowerCase().includes(q)))});
+if(projectSelect){
+  projectSelect.addEventListener("change",()=>{
+    const option=projectSelect.options[projectSelect.selectedIndex];
+    if(option && option.dataset.title){titleInput.value=option.dataset.title;titleInput.readOnly=true;}
+    else titleInput.readOnly=false;
+  });
+}
+syncTeamMembers(); syncTaskType(); filterPeopleByDepartment();
+if(projectSelect && projectSelect.value) projectSelect.dispatchEvent(new Event("change"));
+</script>
+{% endblock %}

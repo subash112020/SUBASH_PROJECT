@@ -1,0 +1,33 @@
+[
+  {
+    "id": "admin01",
+    "username": "desflyer",
+    "password": "pbkdf2_sha256$b521b8fe4cd483b43dcadf682a11ba1c$0af6714466f31edb20776839677c2c3272603c5a511bd39be56fd71544abffcd",
+    "role": "admin",
+    "email": "admin@internshiptracker.local"
+  },
+  {
+    "id": "mentor01",
+    "username": "atchayasri",
+    "password": "pbkdf2_sha256$b852a2c6ced88d3adb1c7dd9777e9057$c1459f78a1b12018b2931ece7b484edc62a0efc2a250a17ef1bc6bd8779b2d86",
+    "role": "mentor",
+    "email": "atchayasri@gmail.com",
+    "mentor_id": "31bd4fb72a"
+  },
+  {
+    "id": "0798b0a4a2",
+    "username": "subash",
+    "email": "subash@gmail.com",
+    "password": "pbkdf2_sha256$58a1aa980d1e0befc91e1f8ba6017134$f6f35e29861f3edb095ee3b406713747aa21b7500a07cbb60e85585dc9728887",
+    "role": "intern",
+    "intern_id": "104"
+  },
+  {
+    "id": "7a039766a4",
+    "username": "gayathri",
+    "email": "gayathri@gmail.com",
+    "password": "pbkdf2_sha256$8ee9cfcd2f0b56b1cf7f488f8f9af9f2$cb038791fe65852008a504b39067265bf9e7a495de8e1f1fc8535b3a79565534",
+    "role": "intern",
+    "intern_id": "101"
+  }
+]

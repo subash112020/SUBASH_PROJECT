@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Mentor' if mentor else 'Add Mentor' }}{% endblock %}
+{% block content %}
+<div class="fixed-form-page">
+  <div class="page-heading compact-heading">
+    <div><span class="eyebrow">People directory</span><h1>{{ 'Edit mentor details' if mentor else 'Add a new mentor' }}</h1></div>
+    <a class="btn btn-outline-secondary" href="{{ url_for('view_mentors') }}"><i class="bi bi-arrow-left"></i> Back to mentors</a>
+  </div>
+  <form method="post" enctype="multipart/form-data" class="card form-card compact-form-card">
+    <div class="card-body p-4 p-lg-4">
+      <div class="row g-3">
+        <div class="col-md-3"><label class="form-label">Mentor ID</label><input class="form-control" name="id" value="{{ mentor.id if mentor else '' }}" {{ 'readonly' if mentor else 'required' }}></div>
+        <div class="col-md-5"><label class="form-label">Mentor Name</label><input class="form-control" name="name" value="{{ mentor.name if mentor else '' }}" required></div>
+        <div class="col-md-4"><label class="form-label">Email</label><input class="form-control" type="email" name="email" value="{{ mentor.email if mentor else '' }}" required></div>
+        <div class="col-md-4"><label class="form-label">Phone Number</label><input class="form-control" type="tel" name="phone" value="{{ mentor.phone if mentor else '' }}" required></div>
+        <div class="col-md-4"><label class="form-label">Department</label>
+          <select class="form-select" name="department" required>
+            <option value="">Select department</option>
+            {% for department in departments %}<option value="{{ department }}" {{ 'selected' if mentor and mentor.department == department else '' }}>{{ department }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4"><label class="form-label">Document</label><input class="form-control" type="file" name="document"></div>
+      </div>
+      <div class="mt-4 d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('view_mentors') }}">Cancel</a>
+        <button class="btn btn-primary px-4" type="submit"><i class="bi bi-check2-circle"></i> {{ 'Save changes' if mentor else 'Add mentor' }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "101",
+    "name": "Gayathri B",
+    "email": "gayathiribkpg@gmail.com",
+    "phone": "6382986610",
+    "department": "Python Developement",
+    "joining_date": "2026-05-07",
+    "assigned_mentor": "31bd4fb72a",
+    "duration_months": 2,
+    "end_date": "2026-07-07",
+    "employment_status": "Past Employee"
+  },
+  {
+    "id": "102",
+    "name": "Pavithra B",
+    "email": "pavigayu12@gmail.com",
+    "phone": "8778818510",
+    "department": "Fullstack Developement",
+    "joining_date": "2026-09-15",
+    "duration_months": 2,
+    "end_date": "2026-11-15",
+    "employment_status": "Active Intern",
+    "assigned_mentor": "925c67e57f"
+  },
+  {
+    "id": "103",
+    "name": "Balaji",
+    "email": "balajikavitha@gmailcom",
+    "phone": "9789030392",
+    "department": "Android Developement",
+    "joining_date": "2026-09-17",
+    "assigned_mentor": "",
+    "duration_months": 2,
+    "end_date": "2026-11-17",
+    "employment_status": "Active Intern"
+  },
+  {
+    "id": "104",
+    "name": "subash",
+    "email": "subash@gmail.com",
+    "phone": "9345452712",
+    "department": "Python Developement",
+    "joining_date": "2026-09-18",
+    "assigned_mentor": "31bd4fb72a",
+    "duration_months": 3,
+    "end_date": "2026-12-18",
+    "employment_status": "Active Intern"
+  },
+  {
+    "id": "108",
+    "name": "predeep",
+    "email": "predeep@gmail.com",
+    "phone": "688754526",
+    "department": "Fullstack Developement",
+    "joining_date": "2026-09-18",
+    "assigned_mentor": "31bd4fb72a",
+    "duration_months": 1,
+    "end_date": "2026-10-18",
+    "employment_status": "Active Intern"
+  }
+]

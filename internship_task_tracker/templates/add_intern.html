@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Intern' if intern else 'Add Intern' }}{% endblock %}
+{% block content %}
+<div class="fixed-form-page">
+  <div class="page-heading compact-heading">
+    <div><span class="eyebrow">People directory</span><h1>{{ 'Edit intern details' if intern else 'Add a new intern' }}</h1></div>
+    <a class="btn btn-outline-secondary" href="{{ url_for('view_interns') }}"><i class="bi bi-arrow-left"></i> Back to interns</a>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" class="card form-card compact-form-card">
+    <div class="card-body p-4 p-lg-4">
+      <div class="row g-3">
+        <div class="col-md-3"><label class="form-label">Intern ID</label><input class="form-control" name="id" value="{{ intern.id if intern else '' }}" {{ 'readonly' if intern else 'required' }}></div>
+        <div class="col-md-5"><label class="form-label">Intern Name</label><input class="form-control" name="name" value="{{ intern.name if intern else '' }}" required></div>
+        <div class="col-md-4"><label class="form-label">Email</label><input class="form-control" type="email" name="email" value="{{ intern.email if intern else '' }}" required></div>
+
+        <div class="col-md-4"><label class="form-label">Phone Number</label><input class="form-control" type="tel" name="phone" value="{{ intern.phone if intern else '' }}" required></div>
+        <div class="col-md-4"><label class="form-label">Department</label>
+          <select class="form-select" name="department" required>
+            <option value="">Select department</option>
+            {% for department in departments %}<option value="{{ department }}" {{ 'selected' if intern and intern.department == department else '' }}>{{ department }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4"><label class="form-label">Joining Date</label><input class="form-control" type="date" name="joining_date" value="{{ intern.joining_date if intern else '' }}" required></div>
+
+        <div class="col-md-4"><label class="form-label">Internship Duration (months)</label><input class="form-control" type="number" min="1" name="duration_months" value="{{ intern.duration_months if intern else '' }}" required></div>
+        <div class="col-md-4"><label class="form-label">Ending Date</label><input class="form-control" type="date" name="end_date" id="endDate" value="{{ intern.end_date if intern else '' }}" readonly></div>
+        <div class="col-md-4"><label class="form-label">Assigned Mentor</label>
+          <select class="form-select" name="assigned_mentor">
+            <option value="">No mentor assigned</option>
+            {% for mentor in mentors %}<option value="{{ mentor.id }}" {{ 'selected' if intern and intern.assigned_mentor == mentor.id else '' }}>{{ mentor.name }}{% if mentor.department %} · {{ mentor.department }}{% endif %}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-md-8"><label class="form-label">Intern Document <span class="text-muted fw-normal">(optional)</span></label>
+          <div class="document-upload-row">
+            <input class="form-control" type="file" name="document">
+            {% if intern and intern.document %}<a class="btn btn-outline-secondary" href="{{ url_for('download_document', kind='intern', item_id=intern.id) }}"><i class="bi bi-download"></i> Current document</a>{% endif %}
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{{ url_for('view_interns') }}">Cancel</a>
+        <button class="btn btn-primary px-4" type="submit"><i class="bi bi-check2-circle"></i> {{ 'Save changes' if intern else 'Add intern' }}</button>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+const joiningDate = document.querySelector('[name="joining_date"]');
+const durationMonths = document.querySelector('[name="duration_months"]');
+const endDate = document.getElementById("endDate");
+function updateEndDate() {
+  if (!joiningDate.value || !durationMonths.value || Number(durationMonths.value) < 1) { endDate.value = ""; return; }
+  const start = new Date(`${joiningDate.value}T00:00:00`);
+  const months = Number(durationMonths.value);
+  const target = new Date(start.getFullYear(), start.getMonth() + months, start.getDate());
+  if (target.getDate() !== start.getDate()) target.setDate(0);
+  endDate.value = target.toISOString().slice(0,10);
+}
+joiningDate.addEventListener("change", updateEndDate);
+durationMonths.addEventListener("input", updateEndDate);
+updateEndDate();
+</script>
+{% endblock %}

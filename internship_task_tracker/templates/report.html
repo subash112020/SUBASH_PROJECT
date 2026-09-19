@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Progress Reports{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">Performance overview</span><h1>Progress reports</h1><p class="text-muted">Search by name, filter by department, and open an individual report only when needed.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('download_report') }}"><i class="bi bi-file-earmark-pdf"></i> Download all PDFs</a>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body p-3 p-lg-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-lg-5"><label class="form-label">Search report</label><input id="reportSearch" class="form-control" type="search" placeholder="Search by name" autocomplete="off"></div>
+      <div class="col-lg-4"><label class="form-label">Department</label><select id="reportDepartment" class="form-select"><option value="">All departments</option>{% for d in departments %}<option value="{{ d|lower }}">{{ d }}</option>{% endfor %}</select></div>
+      <div class="col-lg-3"><label class="form-label d-block">Show</label><div class="btn-group w-100" role="group"><button type="button" class="btn btn-outline-secondary report-role active" data-role="all">All</button><button type="button" class="btn btn-outline-secondary report-role" data-role="intern">Interns</button><button type="button" class="btn btn-outline-secondary report-role" data-role="mentor">Mentors</button></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="card table-card">
+  <div class="table-scroll report-table-scroll">
+    <table class="table align-middle mb-0">
+      <thead><tr><th>Person</th><th>Role</th><th>Department</th><th>Progress / Workload</th><th>Latest completed task</th><th class="text-end">Report</th></tr></thead>
+      <tbody>
+      {% for intern in interns %}
+      <tr class="report-row" data-role="intern" data-name="{{ intern.name|lower }}" data-department="{{ intern.department|lower }}">
+        <td><strong>{{ intern.name }}</strong><small class="d-block text-muted">ID {{ intern.id }} · Mentor: {{ intern.mentor_name }}</small></td>
+        <td><span class="user-role intern">INTERN</span></td><td>{{ intern.department }}</td>
+        <td><strong>{{ intern.progress }}%</strong><small class="d-block text-muted">{{ intern.completed_tasks }}/{{ intern.total_tasks }} tasks completed</small></td>
+        <td>{{ intern.latest_completed_task }}</td>
+        <td class="text-end text-nowrap">
+          <a class="btn btn-sm btn-light" href="{{ url_for('download_report', intern_id=intern.id) }}" title="Download individual PDF"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+          <details class="report-details d-inline-block ms-1"><summary class="btn btn-sm btn-light">View</summary>
+            <div class="report-popover"><strong>{{ intern.name }}'s tasks</strong>{% for task in intern.tasks %}<div class="report-task-line"><span>{{ task.title }}</span><span class="status status-{{ task.status|lower|replace(' ', '-') }}">{{ task.status }}</span></div>{% else %}<small class="text-muted">No tasks assigned.</small>{% endfor %}</div>
+          </details>
+        </td>
+      </tr>
+      {% endfor %}
+
+      {% for mentor in mentors %}
+      <tr class="report-row" data-role="mentor" data-name="{{ mentor.name|lower }}" data-department="{{ mentor.department|lower }}">
+        <td><strong>{{ mentor.name }}</strong><small class="d-block text-muted">ID {{ mentor.id }} · {{ mentor.email }}</small></td>
+        <td><span class="user-role mentor">MENTOR</span></td><td>{{ mentor.department or 'Not set' }}</td>
+        <td><strong>{{ mentor.assigned_count }}</strong><small class="d-block text-muted">{{ mentor.completed_tasks }}/{{ mentor.total_tasks }} tasks completed</small></td>
+        <td>Mentor workload report</td>
+        <td class="text-end"><a class="btn btn-sm btn-light" href="{{ url_for('download_report', mentor_id=mentor.id) }}"><i class="bi bi-file-earmark-pdf"></i> PDF</a></td>
+      </tr>
+      {% endfor %}
+      {% if not interns and not mentors %}<tr><td colspan="6" class="empty-state">No people available for reports.</td></tr>{% endif %}
+      </tbody>
+    </table>
+  </div>
+  <div id="noReportResults" class="empty-state d-none">No reports match your filters.</div>
+</div>
+
+<script>
+const reportRows=[...document.querySelectorAll(".report-row")], reportSearch=document.getElementById("reportSearch"), reportDepartment=document.getElementById("reportDepartment");
+let selectedRole="all";
+function filterReports(){
+  const q=reportSearch.value.trim().toLowerCase(), d=reportDepartment.value;
+  let n=0;
+  reportRows.forEach(row=>{
+    const ok=(!q||row.dataset.name.includes(q))&&(!d||row.dataset.department===d)&&(selectedRole==="all"||row.dataset.role===selectedRole);
+    row.classList.toggle("d-none",!ok); if(ok)n++;
+  });
+  document.getElementById("noReportResults").classList.toggle("d-none",n!==0);
+}
+reportSearch.addEventListener("input",filterReports); reportDepartment.addEventListener("input",filterReports);
+document.querySelectorAll(".report-role").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll(".report-role").forEach(b=>b.classList.remove("active"));btn.classList.add("active");selectedRole=btn.dataset.role;filterReports()}));
+</script>
+{% endblock %}

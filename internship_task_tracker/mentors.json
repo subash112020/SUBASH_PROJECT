@@ -1,0 +1,23 @@
+[
+  {
+    "id": "31bd4fb72a",
+    "name": "Atchayasri",
+    "email": "atchayasri@gmail.com",
+    "phone": "7894561230",
+    "department": "Python Developement"
+  },
+  {
+    "id": "925c67e57f",
+    "name": "kumar",
+    "email": "kumar@gmail.com",
+    "phone": "9638527410",
+    "department": "Fullstack Developement"
+  },
+  {
+    "id": "89dd99db82",
+    "name": "sakthi",
+    "email": "sakthi@gmail.com",
+    "phone": "7410852963",
+    "department": "Android Developement"
+  }
+]

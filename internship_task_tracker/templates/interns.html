@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Interns{% endblock %}
+{% block content %}
+<div class="page-heading">
+  <div><span class="eyebrow">People directory</span><h1>Interns</h1>
+  <p class="text-muted">Active interns are shown first. Past interns are kept at the bottom.</p></div>
+  {% if current_user.role == 'admin' %}
+  <a class="btn btn-primary" href="{{ url_for('add_intern') }}"><i class="bi bi-person-plus-fill"></i> Add intern</a>
+  {% endif %}
+</div>
+
+<div class="card mb-4">
+  <div class="card-body p-3 p-lg-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4"><label class="form-label">Intern Name</label><input class="form-control intern-filter" id="internNameFilter" type="search" placeholder="Search by name" autocomplete="off"></div>
+      <div class="col-md-3"><label class="form-label">Intern ID</label><input class="form-control intern-filter" id="internIdFilter" type="search" placeholder="Search by ID" autocomplete="off"></div>
+      <div class="col-md-3"><label class="form-label">Department</label>
+        <select class="form-select intern-filter" id="departmentFilter">
+          <option value="">All departments</option>
+          {% for department in departments %}<option value="{{ department|lower }}">{{ department }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2"><button class="btn btn-outline-secondary w-100" type="button" id="clearInternFilters"><i class="bi bi-x-lg"></i> Clear</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="card table-card">
+  <div class="table-scroll">
+    <table class="table align-middle mb-0">
+      <thead><tr>
+        <th>Intern ID</th><th>Intern Name</th><th>Department</th><th>Mentor</th><th>Duration</th><th>End date</th>
+        <th>Status</th><th>Contact</th><th>Tasks</th><th style="min-width:170px">Progress</th><th class="text-end">Actions</th>
+      </tr></thead>
+      <tbody>
+      {% for intern in interns %}
+      <tr class="intern-row" data-name="{{ intern.name|lower }}" data-intern-id="{{ intern.id|lower }}" data-department="{{ intern.department|lower }}">
+        <td>{{ intern.id }}</td>
+        <td><strong>{{ intern.name }}</strong></td>
+        <td><span class="badge department-badge">{{ intern.department }}</span></td>
+        <td><i class="bi bi-person-badge text-muted"></i> {{ intern.mentor_name }}</td>
+        <td>{{ intern.duration_months }} months</td>
+        <td>{{ intern.end_date or 'Not set' }}</td>
+        <td><span class="badge {{ 'status-active' if intern.employment_status == 'Active Intern' else 'status-past' }}">{{ intern.employment_status }}</span></td>
+        <td>{{ intern.email }}<small class="d-block text-muted">{{ intern.phone }}</small></td>
+        <td>{{ intern.total_tasks }} total<small class="d-block text-muted">{{ intern.completed_tasks }} complete</small></td>
+        <td><div class="d-flex justify-content-between small mb-1"><span>{{ intern.progress }}%</span><span class="text-muted">{{ intern.completed_tasks }}/{{ intern.total_tasks }}</span></div><div class="progress"><div class="progress-bar" style="width:{{ intern.progress }}%"></div></div></td>
+        <td class="text-end text-nowrap">
+          {% if intern.document %}
+          <a class="btn btn-sm btn-light" title="Download document" href="{{ url_for('download_document', kind='intern', item_id=intern.id) }}"><i class="bi bi-file-earmark-arrow-down"></i> Download Document</a>
+          {% endif %}
+          {% if current_user.role == 'admin' %}
+          <a class="btn btn-sm btn-light" title="Edit intern" href="{{ url_for('edit_intern', intern_id=intern.id) }}"><i class="bi bi-pencil"></i></a>
+          <form class="d-inline" method="post" action="{{ url_for('delete_intern', intern_id=intern.id) }}" onsubmit="return confirm('Delete this intern and their tasks?')"><button class="btn btn-sm btn-light text-danger" title="Delete intern"><i class="bi bi-trash3"></i></button></form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="11" class="empty-state">No interns yet. Add your first intern to get started.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div id="noInternMatches" class="empty-state d-none">No interns found.</div>
+</div>
+
+<script>
+const internRows = [...document.querySelectorAll(".intern-row")];
+const nameFilter = document.getElementById("internNameFilter");
+const idFilter = document.getElementById("internIdFilter");
+const departmentFilter = document.getElementById("departmentFilter");
+function filterInterns() {
+  const name = nameFilter.value.trim().toLowerCase();
+  const id = idFilter.value.trim().toLowerCase();
+  const department = departmentFilter.value.trim().toLowerCase();
+  let visible = 0;
+  internRows.forEach(row => {
+    const matches = (!name || row.dataset.name.includes(name)) &&
+                    (!id || row.dataset.internId.includes(id)) &&
+                    (!department || row.dataset.department === department);
+    row.classList.toggle("d-none", !matches);
+    if (matches) visible++;
+  });
+  document.getElementById("noInternMatches").classList.toggle("d-none", visible !== 0);
+}
+[nameFilter,idFilter,departmentFilter].forEach(el => el.addEventListener("input", filterInterns));
+document.getElementById("clearInternFilters").addEventListener("click", () => {
+  nameFilter.value = ""; idFilter.value = ""; departmentFilter.value = ""; filterInterns();
+});
+</script>
+{% endblock %}

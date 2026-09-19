@@ -1,0 +1,66 @@
+[
+  {
+    "id": "bac0f25b3c",
+    "intern_id": "101",
+    "title": "python project",
+    "description": "SIP provider is not required for the initial local testing. We can use Asterisk with local SIP extensions/softphones for testing. If we need to make real phone calls, we can choose a SIP provider later.",
+    "deadline": "2026-09-16",
+    "priority": "High",
+    "status": "Completed",
+    "task_type": "Individual Work",
+    "assigned_intern_ids": [
+      "101"
+    ],
+    "assigned_names": [
+      "Gayathri B"
+    ]
+  },
+  {
+    "id": "85e5525545",
+    "intern_id": "102",
+    "title": "Automatic_call",
+    "description": "the mail is recive means automatic will be conduct",
+    "deadline": "2026-09-17",
+    "priority": "Medium",
+    "status": "Completed"
+  },
+  {
+    "id": "38255aecc3",
+    "intern_id": "101",
+    "title": "student management",
+    "description": "create a student management",
+    "deadline": "2026-09-17",
+    "priority": "High",
+    "status": "Completed",
+    "task_type": "Individual Work",
+    "assigned_intern_ids": [
+      "101"
+    ],
+    "assigned_names": [
+      "Gayathri B"
+    ]
+  },
+  {
+    "id": "92c148ff5a",
+    "intern_id": "104",
+    "title": "intern tracker",
+    "description": "build using python and flask for easy use",
+    "deadline": "2026-09-19",
+    "priority": "Medium",
+    "status": "Completed",
+    "project_file": {
+      "filename": "IMS_Internship_Management_System_Fixed.zip",
+      "stored_name": "92c148ff5a_2ec079da1741_IMS_Internship_Management_System_Fixed.zip"
+    },
+    "completed_at": "2026-09-19"
+  },
+  {
+    "id": "fddc10cef6",
+    "intern_id": "102",
+    "title": "stress prediction",
+    "description": "to predict the stress for it people",
+    "deadline": "2026-09-19",
+    "priority": "High",
+    "status": "In Progress"
+  }
+]

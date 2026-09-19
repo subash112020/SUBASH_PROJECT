@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+uploads/
+internship.db
+token files
+credentials
